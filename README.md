@@ -5,7 +5,7 @@ Authors: Nathan Hoffman &
 
 Emails: nh662219@ohio.edu &
 
- 
+
 Instructions:
 
 ![image](https://github.com/nh662219/cs4100proj2/assets/97468108/24138f0c-d050-4e89-bbfe-79b22499e85d)
