@@ -1,9 +1,9 @@
 # cs4100proj2
 Ohio University CS 4100 Project 2: TreeBuilder Compiler
 
-Authors: Nathan Hoffman &
+Authors: Nathan Hoffman & Kara Nemet
 
-Emails: nh662219@ohio.edu &
+Emails: nh662219@ohio.edu & kn485120@ohio.edu
 
 
 Instructions:
