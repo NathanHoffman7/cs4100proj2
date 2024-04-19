@@ -4,35 +4,40 @@
 # Description: Makefile for cs4100 Project2, TreeBuilder Compiler.
 # Date: 4/16/2024
 
-# Compile using make -> make run, or make all.
+# Compile using: make -> make run
+# Shortcut Compilation: make all
+# Clean up: make clean
 
 # The .PHONY target mark the list of targets
 # as none-file.
 .PHONY: build run clean all
 
 
-build: cmos
+build: tree_builder
 # @echo "build complete."
 
-cmos: cmos.o greedy.o
-# @echo "Building cmos..."
-	$(CXX) -o $@ $^
+tree_builder: tree_builder.tab.c lex.yy.c parse_tree.h tree_node.h
+# @echo "Building tree_builder..."
+	$(CXX) -o $@ $^ -ll
 
-cmos.o: cmos.cpp greedy.h
-	$(CXX) -c -o $@ $<
+tree_builder.tab.c: tree_builder.y parse_tree.h tree_node.h
+# @echo "Building tree_builder.tab.c..."
+	bison -d $<
+	
+lex.yy.c: tree_builder.l 
+# @echo "Building lex.yy.c..."
+	flex $<
 
-greedy.o: greedy.cc greedy.h
-	$(CXX) -c -o $@ $<
-
-run: cmos
+run: tree_builder
 # @echo "running..."
-	./cmos
+	./tree_builder
 # @echo "run complete."
 
 clean:
 #	@echo "Cleaning up compliation files..."
-	-rm -f cmos
-	-rm -f *.o
+	-rm -f tree_builder
+	-rm -f tree_builder.tab.c
+	-rm -f flex.yy.c
 # @echo "clean complete."
 
 all: build run
