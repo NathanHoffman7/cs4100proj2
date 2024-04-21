@@ -5,6 +5,9 @@
 /* Date: 04-16-2024                                         */
 
 %{
+    #define TK_VAR 1
+    #define TK_WS 2 /* White space */
+
     #include <iostream>
     #include <vector>
     #include <list>
@@ -74,22 +77,5 @@ VAR ({L}|{NUM})({L}|{NUM}| _ )*
                                        }
                                    } 
                                 }  
-
-print                          {return TKPRINT;}
-while                          {return TKWHILE;}
-[0-9][0-9]*                {yylval.s_val = strdup(yytext);
-                            return TKINT;}
-[a-zA-Z][a-zA-Z_.\-0-9]*        { //cout << "Found id" << yytext << endl;
-                                  yylval.s_val = strdup(yytext);
-                                  return TKID; // Set yylval
-                                }
-\<\=                              {return TKLE;}
-\>\=                              {return TKGE;}
-\=\=                              {return TKEE;}  
-[+\-*/%{},;=\<\>()]                          {return yytext[0];}
-.                               { cout << "Illegal Character " << yytext <<"on line" << linecount << endl;
-				 cout << "Ignored" << endl;
-				 ACC(yytext[0]);}
-
 %%
 
