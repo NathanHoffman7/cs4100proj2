@@ -1,0 +1,19 @@
+buildnode{
+name="root";
+weight=10;
+};
+for i in [1:10] {
+  buildnode {
+  name = "A"+i;
+  weight = i+3;
+  isachildof ="root";
+  };
+}
+for i in [1:5] {
+  buildnode {
+  name = "B"+i;
+  weight = i+2;
+  isachildof ="A"+i;
+  };
+}
+
