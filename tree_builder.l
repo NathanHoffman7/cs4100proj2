@@ -6,6 +6,7 @@
 %{
 #include <iostream>
 #include <fstream>
+#include "tree_node.h"
 using namespace std;
 
 // Define the token types (need some revision)
@@ -15,9 +16,9 @@ using namespace std;
 #define TK_NAME 4
 #define TK_WEIGHT 5
 #define TK_IsAChildOf 6
-#define TK_ASSIGN 7
+#define TK_INT 7
 #define TK_STRING 8
-#define TK_SYMBOL 9
+#define TK_IDENTIFIER 9
 
 
 
@@ -25,7 +26,8 @@ using namespace std;
 int lineCount = 1;
 int n;
 char *return_string;
-char return_char;
+char *return_identifier;
+int return_int;
 void ACC(char c)
 {
     if (c == '\n')
@@ -44,6 +46,7 @@ WHITE     [ \t\n\f\r]
 NUM       [0-9]+
 L         [a-zA-Z]+
 STRING    \"[^"]*\"
+IDENTIFIER ({NUM}|{L})({NUM}|{L}|_)*
 
 /*---------TRANSLATION-RULES--------*/
 %%
@@ -56,55 +59,8 @@ name         { return TK_NAME; }
 weight       { return TK_WEIGHT; }
 isachildof   { return TK_IsAChildOf; }
 {STRING}     {return_string = yytext; return TK_STRING;}
-{L}          {return_string = yytext; return TK_ASSIGN;}
-{NUM}        {return_string = yytext; return TK_ASSIGN;}
-[\{|\}|\(|\)|\,|\;|=|:|\[|\]|+]  { return_char = yytext[0]; return TK_SYMBOL; }
+{NUM}        { return_int = atoi(yytext); return TK_INT; }
+{IDENTIFIER} {return_identifier = yytext; return TK_IDENTIFIER;}
+[\{|\}|\(|\)|\,|\;|=|:|\[|\]|+] {return yytext[0];}
 
 %%
-/*------------AUX-CODE------------*/
-int yywrap()
-{
-    return 1;
-}
-
-int main(int argc, char *argv[])
-{
-    int token;
-    ofstream out;
-    out.open("test_out.txt");
-    while (token = yylex())
-    {
-        switch (token)
-        {
-        case TK_BLDNODE:
-            out << "TK_BLDNODE" << endl;
-            break;
-        case TK_FOR:
-            out << "TK_FOR" << endl;
-            break;
-        case TK_IN:
-            out << "TK_IN" << endl;
-            break;
-        case TK_NAME:
-            out << "TK_NAME" << endl;
-            break;
-        case TK_WEIGHT:
-            out << "TK_WEIGHT" << endl;
-            break;
-        case TK_IsAChildOf:
-            out << "TK_IsAChildOf" << endl;
-            break;
-        case TK_ASSIGN:
-            out << return_string << endl;
-            break;
-        case TK_STRING:
-            out << return_string << endl;
-            break;
-        case TK_SYMBOL:
-            out << return_char << endl;
-            break;
-        default:
-            break;
-        }
-    }
-}

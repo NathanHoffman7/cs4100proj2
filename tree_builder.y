@@ -1,96 +1,88 @@
-
 %start start_var
-%token TK_VAR TK_WS
-%left '*' '/' '%'
-%left '+' '-'
+%token TK_STRING TK_INT TK_IDENTIFIER
+%token TK_BLDNODE TK_FOR TK_IN TK_NAME TK_WEIGHT TK_IsAChildOf
+%left '+'
 
 %{
-#include <map>
-#include <string>
-#include "parse_tree.h"
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
+    #include <map>
+    #include "parse_tree.h"
+    #include "tree_node.h"
 
-using namespace std;
-
+    #include <iostream>
+    using namespace std;
+%}
+%{
+    extern int yylex();
+    extern void yyerror(char *string);
 %}
 
 %union {
-  char* s_val;
-  integer_expression *int_ptr;
-  boolean_expression *bool_ptr;
-  statement *s_ptr;
-  compound_statement *c_ptr;
+    char* str;
+    int num;
+    int_expr *int_ptr;
+    str_expr *str_ptr;
+    statement *s_ptr;
+    compound_statement *c_ptr;
+    
 }
 
-%{
-extern int yylex();
-extern void yyerror(char *String);  
-
-#include <iostream>
- using namespace std;
-
-%}
-
-%type <s_val> TKID TKINT
-%type <int_ptr> integer_expression
-%type <bool_ptr> boolean_expr
-%type <s_ptr> statement while_statement assignment_statement print_statement
+%type <str> TK_STRING TK_IDENTIFIER
+%type <num> TK_INT
+%type <str_ptr> str_expr str_list
+%type <int_ptr> int_expr
+%type <s_ptr> statement for_statement buildnode_statement
 %type <c_ptr> prog start_var
-%%
-start_var : prog { // At this point, the 
-                   // the program is done --- let's evaluate the
-                   // program
-                   map<string,int> my_sym_tab;
-                   $$= $1;
-                   $1->evaluate_statement(my_sym_tab);
-}
 
-prog: statement  prog {$$ = new compound_statement($1,$2);}
+%%
+
+start_var : prog {  map<string, TreeNode> my_sym_tab;
+                $$ = $1;
+                $1->evaluate_statement(my_sym_tab);}
+
+prog : statement prog{ $$ = new compound_statement($1, $2);}
     | {$$ = NULL;}
     ;
-statement: while_statement {$$ = $1;}
-         | assignment_statement {$$ = $1;}
-         | print_statement {$$ = $1;}
-         ;
 
-print_statement: TKPRINT integer_expression ';' {$$ = new print_statement($2);}
-               ;
-assignment_statement: TKID '=' integer_expression ';' { //cout << "TKID = " << $1 << endl;
-                                                        $$ = new assignment_statement($1, $3);}
-                    ;  
+statement : for_statement { $$ = $1;}
+          | buildnode_statement { $$ = $1;}
+          ;
 
-while_statement: TKWHILE '(' boolean_expr ')' '{' prog '}' {$$ = new while_statement($3, $6);}
-               ;
 
-integer_expression: TKINT {//cout << "Integer: " << $1 << endl;
-		      $$ = new int_constant(atoi($1));}
-| TKID {//cout << "Identifier: " << $1 << endl; 
-		      $$= new variable($1); }
-                  | '-' integer_expression {$$=new neg_constant($2);}
-                  | integer_expression '+' integer_expression {$$=new plus_expr($1,$3);}
-                 
-                  | integer_expression '-' integer_expression {$$=new minus_expr($1,$3);}
-                  | integer_expression '*' integer_expression {$$=new mult_expr($1,$3);}
-                  | integer_expression '/' integer_expression {$$=new div_expr($1,$3);}
-                  | integer_expression '%' integer_expression {$$=new mod_expr($1,$3);}
-                  | '(' integer_expression ')' {$$ = $2;} 
-                  ;
+buildnode_statement : TK_BLDNODE '{' TK_NAME '=' str_expr ';' TK_WEIGHT '=' int_expr ';' TK_IsAChildOf '=' str_expr '}'
+{$$ = new buildnode_statement(my_sym_tab, $5, $9, $13);}
+    ;
 
-boolean_expr:  integer_expression '<' integer_expression {$$=new less_expr($1,$3);}
-|  integer_expression '>' integer_expression {$$ = new greater_expr($1,$3);}
-|  integer_expression TKEE integer_expression {$$= new ee_expr($1,$3); }
-|  integer_expression TKLE integer_expression {$$= new le_expr($1,$3); }
-|  integer_expression TKGE integer_expression {$$= new ge_expr($1,$3); }
-            ;
+for_statement : TK_FOR TK_IDENTIFIER TK_IN '[' str_list ']' '{' prog '}' {$$ = new for_statement(my_sym_tab, $2, $5, $8);}
+    | TK_FOR TK_IDENTIFIER TK_IN '[' TK_INT ':' TK_INT ']' '{' prog '}' {$$ = new for_statement(my_sym_tab, $2, $5, $7, $10);}
+    ;
+
+str_expr: TK_STRING { $$ = new str_expr($1); }
+    ;
+
+str_list: str_expr { $$ = new str_list($1);}
+    | str_list ',' str_expr { $$ = new str_list($1, $3);}
+    ;
+
+int_expr: TK_INT { $$ = new int_constant(atoi($1));}
+    | int_expr '+' int_expr { $$ = new add_expr($1, $3);}
+    ;
+    
+
+
+
 %%
 #include "lex.yy.c"
 
-void yyerror(char *error_string)
+void yyerror(char *err_string)
 {
-  cout << "Error : " << error_string << "  on line " << line_num() << endl;
-  exit(-1);
+    cout << "Error : " << err_string << " on line: " << line_number() << endl;
+    exit(-1);
 }
 
-
-main() {
-  yyparse();
+main()
+{
+    yyparse();
 }

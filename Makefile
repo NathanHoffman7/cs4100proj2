@@ -20,9 +20,12 @@ tree_builder: tree_builder.tab.c lex.yy.c parse_tree.h tree_node.h
 # @echo "Building tree_builder..."
 	$(CXX) -o $@ $^ -ll
 
+scanner: lex.yy.c
+	$(CXX) -o scanner lex.yy.c
+
 tree_builder.tab.c: tree_builder.y parse_tree.h tree_node.h
 # @echo "Building tree_builder.tab.c..."
-	bison -d $<
+	bison $<
 	
 lex.yy.c: tree_builder.l 
 # @echo "Building lex.yy.c..."
@@ -30,7 +33,7 @@ lex.yy.c: tree_builder.l
 
 run: tree_builder
 # @echo "running..."
-	./tree_builder
+	./tree_builder < Examples/ex1.tb
 # @echo "run complete."
 
 clean:
