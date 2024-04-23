@@ -35,9 +35,7 @@ run: tree_builder
 
 clean:
 #	@echo "Cleaning up compliation files..."
-	-rm -f tree_builder
-	-rm -f tree_builder.tab.c
-	-rm -f flex.yy.c
+	-rm -f *.c tree_builder tree_builder.tab.h
 # @echo "clean complete."
 
 all: build run

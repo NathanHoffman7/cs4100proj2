@@ -1,6 +1,6 @@
 
 %start start_var
-%token TKPRINT TKWHILE TKID TKEE TKLE TKGE TKINT
+%token TK_VAR TK_WS
 %left '*' '/' '%'
 %left '+' '-'
 
@@ -86,7 +86,7 @@ boolean_expr:  integer_expression '<' integer_expression {$$=new less_expr($1,$3
 
 void yyerror(char *error_string)
 {
-  cout << "Error : " << error_string << "  on line " << line_nmb() << endl;
+  cout << "Error : " << error_string << "  on line " << line_num() << endl;
   exit(-1);
 }
 
