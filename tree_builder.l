@@ -2,80 +2,109 @@
 /*          Kara Nemet     (kn485120@ohio.edu)              */
 /* Brief: This lex program parses a file and tokenizes it.  */
 /*        It then outputs the tokens to a file.             */
-/* Date: 04-16-2024                                         */
-
+/* Date: 4-20-2024                                         */
 %{
-    #define TK_VAR 1
-    #define TK_WS 2 /* White space */
+#include <iostream>
+#include <fstream>
+using namespace std;
 
-    #include <iostream>
-    #include <vector>
-    #include <list>
-    #include <set>
-    #include <map>
-    #include <algorithm>
-    #include <cstdlib>
-    using namespace std;
+// Define the token types (need some revision)
+#define TK_BLDNODE 1
+#define TK_FOR 2
+#define TK_IN 3
+#define TK_NAME 4
+#define TK_WEIGHT 5
+#define TK_IsAChildOf 6
+#define TK_ASSIGN 7
+#define TK_STRING 8
+#define TK_SYMBOL 9
 
-    int linecount=1;
-    int indent;
-    int n;
 
-    void ACC(char c)
+
+/* Count the number of lines */
+int lineCount = 1;
+int n;
+char *return_string;
+char return_char;
+void ACC(char c)
+{
+    if (c == '\n')
     {
-      if (c == '\n')
-        {
-          linecount++;
-        }
+        lineCount++;
     }
-    int line_num()
-    {
-      return linecount;
-    } 
+}
+int line_number()
+{
+    return lineCount;
+}
 
 %}
-
 /*------------MACROS------------*/
-/* Number */
-NUM [0-9]
-/* Letter */
-L [a-zA-Z]
-/* Variable */
-VAR ({L}|{NUM})({L}|{NUM}| _ )*
+WHITE     [ \t\n\f\r]
+NUM       [0-9]+
+L         [a-zA-Z]+
+STRING    \"[^"]*\"
 
-
+/*---------TRANSLATION-RULES--------*/
+%%
+{WHITE}     { ACC(yytext[0]); 
+                /* Remove tabs/whitespace/newlines */}
+buildnode    { return TK_BLDNODE; }
+for          { return TK_FOR; }
+in           { return TK_IN; }
+name         { return TK_NAME; }
+weight       { return TK_WEIGHT; }
+isachildof   { return TK_IsAChildOf; }
+{STRING}     {return_string = yytext; return TK_STRING;}
+{L}          {return_string = yytext; return TK_ASSIGN;}
+{NUM}        {return_string = yytext; return TK_ASSIGN;}
+[\{|\}|\(|\)|\,|\;|=|:|\[|\]|+]  { return_char = yytext[0]; return TK_SYMBOL; }
 
 %%
-\/\/                     {char c; while ((c= yyinput())!='\n') {
-                              if (c==EOF) {
-                                  break;
-                               }
-                              ACC(c);
-                             }
-                                }
-[ \t\n\f]                       {ACC(yytext[0]); /* Remove tabs/spaces/newlines */} 
-\/\*                            {char c;
-                                 int line_cur;
-                                 line_cur = linecount; 
-                                 while (1)  
-                                   {if ((c = yyinput()) == EOF) 
-                                       { 
-                                        /* If this is the case, there is
-                                           an error, an unterminated 
-                                           comment. */
-                               cout << "Detected unterminated comment starting on line" << line_cur << endl;
-                                        return(0); 
-                                       }   
-                                    ACC(c);   
-                                    if (c == '*') 
-                                       {       
-                                        if ((c = yyinput()) == '/')
-                                        {
-                                           break;
-                                        }
-                                        else {unput(c);} 
-                                       }
-                                   } 
-                                }  
-%%
+/*------------AUX-CODE------------*/
+int yywrap()
+{
+    return 1;
+}
 
+int main(int argc, char *argv[])
+{
+    int token;
+    ofstream out;
+    out.open("test_out.txt");
+    while (token = yylex())
+    {
+        switch (token)
+        {
+        case TK_BLDNODE:
+            out << "TK_BLDNODE" << endl;
+            break;
+        case TK_FOR:
+            out << "TK_FOR" << endl;
+            break;
+        case TK_IN:
+            out << "TK_IN" << endl;
+            break;
+        case TK_NAME:
+            out << "TK_NAME" << endl;
+            break;
+        case TK_WEIGHT:
+            out << "TK_WEIGHT" << endl;
+            break;
+        case TK_IsAChildOf:
+            out << "TK_IsAChildOf" << endl;
+            break;
+        case TK_ASSIGN:
+            out << return_string << endl;
+            break;
+        case TK_STRING:
+            out << return_string << endl;
+            break;
+        case TK_SYMBOL:
+            out << return_char << endl;
+            break;
+        default:
+            break;
+        }
+    }
+}
