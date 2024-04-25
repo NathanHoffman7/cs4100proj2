@@ -362,11 +362,11 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[51] =
     {   0,
-        0,    0,   13,   12,    1,   12,   11,    9,   10,   10,
-       10,   10,   10,   10,    0,    8,    9,   10,   10,   10,
-       10,   10,   10,    4,   10,   10,   10,   10,    3,   10,
-       10,   10,   10,   10,    5,   10,   10,   10,   10,   10,
-       10,    6,   10,   10,   10,   10,    2,   10,    7,    0
+        0,    0,   13,   12,   11,   12,   10,    8,    9,    9,
+        9,    9,    9,    9,    0,    7,    8,    9,    9,    9,
+        9,    9,    9,    3,    9,    9,    9,    9,    2,    9,
+        9,    9,    9,    9,    4,    9,    9,    9,    9,    9,
+        9,    5,    9,    9,    9,    9,    1,    9,    6,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -500,24 +500,9 @@ char *yytext;
 #include "tree_node.h"
 using namespace std;
 
-// Define the token types (need some revision)
-#define TK_BLDNODE 1
-#define TK_FOR 2
-#define TK_IN 3
-#define TK_NAME 4
-#define TK_WEIGHT 5
-#define TK_IsAChildOf 6
-#define TK_INT 7
-#define TK_STRING 8
-#define TK_IDENTIFIER 9
-
-
-
 /* Count the number of lines */
 int lineCount = 1;
 int n;
-char *return_string;
-char *return_identifier;
 int return_int;
 void ACC(char c)
 {
@@ -531,10 +516,10 @@ int line_number()
     return lineCount;
 }
 
-#line 535 "lex.yy.c"
+#line 520 "lex.yy.c"
 /*------------MACROS------------*/
 /*---------TRANSLATION-RULES--------*/
-#line 538 "lex.yy.c"
+#line 523 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -751,9 +736,9 @@ YY_DECL
 		}
 
 	{
-#line 52 "tree_builder.l"
+#line 36 "tree_builder.l"
 
-#line 757 "lex.yy.c"
+#line 742 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -811,69 +796,69 @@ do_action:	/* This label is used only to access EOF actions. */
 			goto yy_find_action;
 
 case 1:
-/* rule 1 can match eol */
 YY_RULE_SETUP
-#line 53 "tree_builder.l"
-{ ACC(yytext[0]); 
-                /* Remove tabs/whitespace/newlines */}
+#line 37 "tree_builder.l"
+{ return TK_BLDNODE; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 55 "tree_builder.l"
-{ return TK_BLDNODE; }
+#line 38 "tree_builder.l"
+{ return TK_FOR; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 56 "tree_builder.l"
-{ return TK_FOR; }
+#line 39 "tree_builder.l"
+{ return TK_IN; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 57 "tree_builder.l"
-{ return TK_IN; }
+#line 40 "tree_builder.l"
+{ return TK_NAME; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 58 "tree_builder.l"
-{ return TK_NAME; }
+#line 41 "tree_builder.l"
+{ return TK_WEIGHT; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 59 "tree_builder.l"
-{ return TK_WEIGHT; }
-	YY_BREAK
-case 7:
-YY_RULE_SETUP
-#line 60 "tree_builder.l"
+#line 42 "tree_builder.l"
 { return TK_IsAChildOf; }
 	YY_BREAK
-case 8:
-/* rule 8 can match eol */
+case 7:
+/* rule 7 can match eol */
 YY_RULE_SETUP
-#line 61 "tree_builder.l"
-{return_string = yytext; return TK_STRING;}
+#line 43 "tree_builder.l"
+{yylval.s_val = strdup(yytext); return TK_STRING;}
+	YY_BREAK
+case 8:
+YY_RULE_SETUP
+#line 44 "tree_builder.l"
+{ yylval.s_val = strdup(yytext); return TK_INT; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 62 "tree_builder.l"
-{ return_int = atoi(yytext); return TK_INT; }
+#line 45 "tree_builder.l"
+{yylval.s_val = strdup(yytext); return TK_IDENTIFIER;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 63 "tree_builder.l"
-{return_identifier = yytext; return TK_IDENTIFIER;}
+#line 46 "tree_builder.l"
+{return yytext[0];}
 	YY_BREAK
 case 11:
+/* rule 11 can match eol */
 YY_RULE_SETUP
-#line 64 "tree_builder.l"
-{return yytext[0];}
+#line 47 "tree_builder.l"
+{ ACC(yytext[0]); 
+                /* Remove tabs/whitespace/newlines */}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 66 "tree_builder.l"
+#line 50 "tree_builder.l"
 ECHO;
 	YY_BREAK
-#line 877 "lex.yy.c"
+#line 862 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1878,6 +1863,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 66 "tree_builder.l"
+#line 50 "tree_builder.l"
 
 

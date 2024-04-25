@@ -10,32 +10,29 @@
  * 
  */
 
-#include <map>
 #include <string>
 #include <set>
 #include <algorithm>
 #include <iostream>
-
+#include "tree_node.h"
 
 using namespace std;
 
 class int_expr {
  public:
-  virtual int evaluate_expression(map<string, int> &sym_tab) =0;
+  virtual int evaluate_expression(Map* sym_tab) =0;
 };
-
 
 class str_expr {
  public:
-     virtual char* evaluate_expression(map<string, int> &sym_tab)=0;
+  virtual char* evaluate_expression(Map* sym_tab)=0;
 };
-
 
 class int_constant:public int_expr {
  public:
   int_constant(int val) {saved_val = val;}
 
-  virtual int evaluate_expression(map<string, int> &sym_tab) {
+  virtual int evaluate_expression(Map* sym_tab) {
     return saved_val;
   }
  private:
@@ -44,29 +41,18 @@ class int_constant:public int_expr {
 
 class variable: public int_expr {
  public:
-  variable(char *in_val) {//cout << "Found variable = " << in_val << endl; 
-                          saved_val =in_val;}
+  variable(char *in_val) {saved_val =in_val;}
 
-  virtual int evaluate_expression(map<string, int> &sym_tab) {
-
-    map<string,int>::iterator p;
-    p =sym_tab.find(saved_val);
-    //cout << "Looking up variable " << saved_val << endl;
-    if (p!=sym_tab.end()) {
-      //cout << "Returning value of variable " << saved_val << endl;
-      //cout << "= " << p->second << endl;
-
-      return p->second;
+  virtual int evaluate_expression(Map* sym_tab) {
+    TreeNode* p = find_map(sym_tab, saved_val);
+    if (p != NULL) {
+      return p->weight;
     } else {
-      // ERROR .... for now return -1;
-      // Should throw error!
       return -1;
     }
-
   }
  private:
-  string saved_val;
-  
+  char* saved_val;
 };
 
 class add_expr: public int_expr {
@@ -76,7 +62,7 @@ class add_expr: public int_expr {
     r = right;
   }
 
-  virtual int evaluate_expression(map<string, int> &sym_tab) {
+  virtual int evaluate_expression(Map* sym_tab) {
     return l->evaluate_expression(sym_tab) + r->evaluate_expression(sym_tab);
   }
   
@@ -87,7 +73,7 @@ class add_expr: public int_expr {
 
 class statement {
  public:
-  virtual void evaluate_statement(map<string, int> &sym_tab) =0;
+  virtual void evaluate_statement(Map* sym_tab) =0;
 };
 
 class compound_statement: public statement {
@@ -97,7 +83,7 @@ class compound_statement: public statement {
     r = rest;
   }
   
-  virtual void evaluate_statement(map<string, int> &sym_tab) {
+  virtual void evaluate_statement(Map* sym_tab) {
     if (f!=NULL) {
       f->evaluate_statement(sym_tab);
     }
@@ -109,7 +95,29 @@ class compound_statement: public statement {
   compound_statement *r;
   statement *f;
 };
-  
+
+class buildnode_statement: public statement {
+ public:
+  buildnode_statement(char *id, int weight, char* parent) {
+    ident = id;
+    node_weight = weight;
+    parent_id = parent;
+  }
+  virtual void evaluate_statement(Map* sym_tab) {
+    TreeNode* parent_node = find_map(sym_tab, parent_id);
+    if (parent_node != NULL) {
+      TreeNode* new_node = create_node_with_parent(ident, node_weight, parent_id);
+    } else {
+        std::cerr << "Error: Parent node " << parent_id << " not found." << std::endl;
+        // exit(EXIT_FAILURE);
+    }
+  }
+
+  private: 
+    char* ident;
+    int node_weight;
+    char* parent_id;
+};
 
 // class while_statement: public statement {
 //  public:
@@ -130,26 +138,4 @@ class compound_statement: public statement {
 //     boolean_expression *c;
 //     compound_statement *b;
 //   };
-
-class assignment_statement: public statement {
-
- public:
-  assignment_statement(char *id, int_expr *rhs) {
-    ident = id;
-    r_side = rhs;
-  }
-  virtual void evaluate_statement(map<string, int> &sym_tab) {
-    
-    int temp = r_side->evaluate_expression(sym_tab);
-
-    //cout << "Assigning" << ident << " to " << temp << endl;
-
-    sym_tab[ident]=temp;
-  }
-
-
-  private: 
-    string ident;
-    int_expr *r_side;
-  };
 

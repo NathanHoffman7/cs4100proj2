@@ -20,8 +20,18 @@
 typedef struct TreeNode {
     char* name;
     int weight;
-    struct TreeNode* parent;
+    char* parent;
 } TreeNode;
+
+typedef struct Node {
+    char* key;
+    TreeNode* value;
+    struct Node* next;
+} Node;
+
+typedef struct Map {
+    Node* head;
+} Map;
 
 TreeNode* create_node(char* name, int weight) {
     TreeNode* node = (TreeNode*) malloc(sizeof(TreeNode));
@@ -32,5 +42,37 @@ TreeNode* create_node(char* name, int weight) {
     return node;
 }
 
+TreeNode* create_node_with_parent(char* name, int weight, char* parent) {
+    TreeNode* node = create_node(name, weight);
+    node->parent = parent;
+
+    return node;
+}
+
+Map* create_map() {
+    Map* map = (Map*) malloc(sizeof(Map));
+    map->head = NULL;
+
+    return map;
+}
+
+void insert_map(Map* map, char* key, TreeNode* value) {
+    Node* node = (Node*) malloc(sizeof(Node));
+    node->key = strdup(key);
+    node->value = value;
+    node->next = map->head;
+    map->head = node;
+}
+
+TreeNode* find_map(Map* map, char* key) {
+    Node* node = map->head;
+    while (node != NULL) {
+        if (strcmp(node->key, key) == 0) {
+            return node->value;
+        }
+        node = node->next;
+    }
+    return NULL;
+}
 
 #endif // TREE_NODE_H
