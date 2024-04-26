@@ -19,13 +19,13 @@
 
 typedef struct TreeNode {
     char* name;
-    int weight;
+    char* weight;
     char* parent;
 } TreeNode;
 
 typedef struct Node {
     char* key;
-    TreeNode* value;
+    TreeNode* tree_node;
     struct Node* next;
 } Node;
 
@@ -33,18 +33,11 @@ typedef struct Map {
     Node* head;
 } Map;
 
-TreeNode* create_node(char* name, int weight) {
+TreeNode* create_node(char* name, char* weight, char* parent) {
     TreeNode* node = (TreeNode*) malloc(sizeof(TreeNode));
     node->name = strdup(name);
-    node->weight = weight;
-    node->parent = NULL;
-
-    return node;
-}
-
-TreeNode* create_node_with_parent(char* name, int weight, char* parent) {
-    TreeNode* node = create_node(name, weight);
-    node->parent = parent;
+    node->weight = strdup(weight);
+    node->parent = parent ? strdup(parent) : NULL;
 
     return node;
 }
@@ -56,10 +49,14 @@ Map* create_map() {
     return map;
 }
 
-void insert_map(Map* map, char* key, TreeNode* value) {
+void insert_map(Map* map, char* key, TreeNode* tree_node) {
     Node* node = (Node*) malloc(sizeof(Node));
+    if (node == NULL) {
+        fprintf(stderr, "Failed to allocate memory for Node.\n");
+        exit(1);
+    }
     node->key = strdup(key);
-    node->value = value;
+    node->tree_node = tree_node;
     node->next = map->head;
     map->head = node;
 }
@@ -68,11 +65,22 @@ TreeNode* find_map(Map* map, char* key) {
     Node* node = map->head;
     while (node != NULL) {
         if (strcmp(node->key, key) == 0) {
-            return node->value;
+            return node->tree_node;
         }
         node = node->next;
     }
     return NULL;
+}
+
+void print_map(Map* map, Node* node) {
+    while (node != NULL) {
+        std::cout << "(<" << node->tree_node->name << "," << node->tree_node->weight << ">";
+        node = node->next;
+        if (node != NULL) {
+            std::cout << ",";
+        }
+    }
+    std::cout << ")";
 }
 
 #endif // TREE_NODE_H

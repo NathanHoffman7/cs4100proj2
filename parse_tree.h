@@ -46,7 +46,7 @@ class variable: public int_expr {
   virtual int evaluate_expression(Map* sym_tab) {
     TreeNode* p = find_map(sym_tab, saved_val);
     if (p != NULL) {
-      return p->weight;
+      return atoi(p->weight);
     } else {
       return -1;
     }
@@ -98,7 +98,7 @@ class compound_statement: public statement {
 
 class buildnode_statement: public statement {
  public:
-  buildnode_statement(char *id, int weight, char* parent) {
+  buildnode_statement(char *id, char *weight, char* parent) {
     ident = id;
     node_weight = weight;
     parent_id = parent;
@@ -106,16 +106,16 @@ class buildnode_statement: public statement {
   virtual void evaluate_statement(Map* sym_tab) {
     TreeNode* parent_node = find_map(sym_tab, parent_id);
     if (parent_node != NULL) {
-      TreeNode* new_node = create_node_with_parent(ident, node_weight, parent_id);
+      TreeNode* new_node = create_node(ident, node_weight, parent_id);
     } else {
         std::cerr << "Error: Parent node " << parent_id << " not found." << std::endl;
-        // exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
   }
 
   private: 
     char* ident;
-    int node_weight;
+    char *node_weight;
     char* parent_id;
 };
 
