@@ -18,11 +18,13 @@ build: tree_builder
 
 tree_builder: tree_builder.tab.c lex.yy.c parse_tree.h tree_node.h
 # @echo "Building tree_builder..."
-	$(CXX) -o $@ $^ -ll
+	$(CXX) -o $@ $< -ll
 
 tree_builder.tab.c: tree_builder.y parse_tree.h tree_node.h
 # @echo "Building tree_builder.tab.c..."
-	bison -d $<
+	bison $<
+	cat tree_builder.tab.c | sed 's/  __attribute__ ((__unused__))/\/\/ /g' >temp.cc
+	mv temp.cc tree_builder.tab.c
 	
 lex.yy.c: tree_builder.l 
 # @echo "Building lex.yy.c..."
@@ -30,7 +32,7 @@ lex.yy.c: tree_builder.l
 
 run: tree_builder
 # @echo "running..."
-	./tree_builder
+	./tree_builder < Examples/ex1.tb
 # @echo "run complete."
 
 clean:

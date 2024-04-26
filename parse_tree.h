@@ -10,227 +10,70 @@
  * 
  */
 
-#include <map>
 #include <string>
 #include <set>
 #include <algorithm>
 #include <iostream>
-
+#include "tree_node.h"
 
 using namespace std;
 
-class integer_expression {
+class int_expr {
  public:
-  virtual int evaluate_expression(map<string, int> &sym_tab) =0;
+  virtual int evaluate_expression(Map* sym_tab) =0;
 };
 
-
-class boolean_expression {
+class str_expr {
  public:
-     virtual bool evaluate_expression(map<string, int> &sym_tab)=0;
+  virtual char* evaluate_expression(Map* sym_tab)=0;
 };
 
-
-class int_constant:public integer_expression {
+class int_constant:public int_expr {
  public:
   int_constant(int val) {saved_val = val;}
 
-  virtual int evaluate_expression(map<string, int> &sym_tab) {
+  virtual int evaluate_expression(Map* sym_tab) {
     return saved_val;
   }
  private:
   int saved_val;
 };
 
-class variable: public integer_expression {
+class variable: public int_expr {
  public:
-  variable(char *in_val) {//cout << "Found variable = " << in_val << endl; 
-                          saved_val =in_val;}
+  variable(char *in_val) {saved_val =in_val;}
 
-  virtual int evaluate_expression(map<string, int> &sym_tab) {
-
-    map<string,int>::iterator p;
-    p =sym_tab.find(saved_val);
-    //cout << "Looking up variable " << saved_val << endl;
-    if (p!=sym_tab.end()) {
-      //cout << "Returning value of variable " << saved_val << endl;
-      //cout << "= " << p->second << endl;
-
-      return p->second;
+  virtual int evaluate_expression(Map* sym_tab) {
+    TreeNode* p = find_map(sym_tab, saved_val);
+    if (p != NULL) {
+      return atoi(p->weight);
     } else {
-      // ERROR .... for now return -1;
-      // Should throw error!
       return -1;
     }
-
   }
  private:
-  string saved_val;
-  
+  char* saved_val;
 };
 
-class neg_constant: public integer_expression {
+class add_expr: public int_expr {
  public:
-  neg_constant(integer_expression *ptr) {
-    eval_ptr = ptr;
-  }
-  
-  virtual int evaluate_expression(map<string, int> &sym_tab) {
-    return -eval_ptr->evaluate_expression(sym_tab);
-  }
-  integer_expression *eval_ptr;
-};
-
-
-
-class plus_expr: public integer_expression {
- public:
-  plus_expr(integer_expression *left, integer_expression *right) {
+  add_expr(int_expr *left, int_expr *right) {
     l = left;
     r = right;
   }
 
-  virtual int evaluate_expression(map<string, int> &sym_tab) {
+  virtual int evaluate_expression(Map* sym_tab) {
     return l->evaluate_expression(sym_tab) + r->evaluate_expression(sym_tab);
   }
   
   private:
-    integer_expression *l;
-    integer_expression *r;
+    int_expr *l;
+    int_expr *r;
 };
-
-class minus_expr: public integer_expression {
- public:
-  minus_expr(integer_expression *left, integer_expression *right) {
-    l = left;
-    r = right;
-  }
-
-  virtual int evaluate_expression(map<string, int> &sym_tab) {
-    return l->evaluate_expression(sym_tab) - r->evaluate_expression(sym_tab);
-  }
-  
-  private:
-    integer_expression *l;
-    integer_expression *r;
-};
-
-class mult_expr: public integer_expression {
- public:
-  mult_expr(integer_expression *left, integer_expression *right) {
-    l = left;
-    r = right;
-  }
-
-  virtual int evaluate_expression(map<string, int> &sym_tab) {
-    return l->evaluate_expression(sym_tab) * r->evaluate_expression(sym_tab);
-  }
-  
-  private:
-    integer_expression *l;
-    integer_expression *r;
-};
-
-
-class div_expr: public integer_expression {
- public:
-  div_expr(integer_expression *left, integer_expression *right) {
-    l = left;
-    r = right;
-  }
-
-  virtual int evaluate_expression(map<string, int> &sym_tab) {
-    return l->evaluate_expression(sym_tab) / r->evaluate_expression(sym_tab);
-  }
-  
-  private:
-    integer_expression *l;
-    integer_expression *r;
-};
-
-class mod_expr: public integer_expression {
- public:
-  mod_expr(integer_expression *left, integer_expression *right) {
-    l = left;
-    r = right;
-  }
-
-  virtual int evaluate_expression(map<string, int> &sym_tab) {
-    return l->evaluate_expression(sym_tab) % r->evaluate_expression(sym_tab);
-  }
-  
-  private:
-    integer_expression *l;
-    integer_expression *r;
-};
-
-
-class less_expr: public boolean_expression {
- public:
-  less_expr(integer_expression *left, integer_expression *right) {
-    l=left; r=right;
-  }
-  virtual bool evaluate_expression(map<string, int> &sym_tab) {
-    return l->evaluate_expression(sym_tab) < r->evaluate_expression(sym_tab);
-  }
- private:
-  integer_expression *l;
-  integer_expression *r;
-};
-class greater_expr: public boolean_expression {
- public:
-  greater_expr(integer_expression *left, integer_expression *right) {
-    l=left; r=right;
-  }
-  virtual bool evaluate_expression(map<string, int> &sym_tab) {
-    return l->evaluate_expression(sym_tab) > r->evaluate_expression(sym_tab);
-  }
- private:
-  integer_expression *l;
-  integer_expression *r;
-};
-class ge_expr: public boolean_expression {
- public:
-  ge_expr(integer_expression *left, integer_expression *right) {
-    l=left; r=right;
-  }
-  virtual bool evaluate_expression(map<string, int> &sym_tab) {
-    return l->evaluate_expression(sym_tab) >= r->evaluate_expression(sym_tab);
-  }
- private:
-  integer_expression *l;
-  integer_expression *r;
-};
-class le_expr: public boolean_expression {
- public:
-  le_expr(integer_expression *left, integer_expression *right) {
-    l=left; r=right;
-  }
-  virtual bool evaluate_expression(map<string, int> &sym_tab) {
-    return l->evaluate_expression(sym_tab) <= r->evaluate_expression(sym_tab);
-  }
- private:
-  integer_expression *l;
-  integer_expression *r;
-};
-class ee_expr: public boolean_expression {
- public:
-  ee_expr(integer_expression *left, integer_expression *right) {
-    l=left; r=right;
-  }
-  virtual bool evaluate_expression(map<string, int> &sym_tab) {
-    return l->evaluate_expression(sym_tab) == r->evaluate_expression(sym_tab);
-  }
- private:
-  integer_expression *l;
-  integer_expression *r;
-};
-
-
 
 class statement {
  public:
-  virtual void evaluate_statement(map<string, int> &sym_tab) =0;
+  virtual void evaluate_statement(Map* sym_tab) =0;
 };
 
 class compound_statement: public statement {
@@ -240,7 +83,7 @@ class compound_statement: public statement {
     r = rest;
   }
   
-  virtual void evaluate_statement(map<string, int> &sym_tab) {
+  virtual void evaluate_statement(Map* sym_tab) {
     if (f!=NULL) {
       f->evaluate_statement(sym_tab);
     }
@@ -252,61 +95,48 @@ class compound_statement: public statement {
   compound_statement *r;
   statement *f;
 };
-  
 
-class while_statement: public statement {
+class buildnode_statement: public statement {
  public:
-  while_statement(boolean_expression *cond, compound_statement *body) {
-    c=cond;
-    b=body;
-  }
-
-  virtual void evaluate_statement(map<string, int> &sym_tab) {
-    while (c->evaluate_expression(sym_tab)) {
-      b->evaluate_statement(sym_tab);
-    }
-  }
-    
-
-    
-  private:
-    boolean_expression *c;
-    compound_statement *b;
-  };
-
-class assignment_statement: public statement {
-
- public:
-  assignment_statement(char *id, integer_expression *rhs) {
+  buildnode_statement(char *id, char *weight, char* parent) {
     ident = id;
-    r_side = rhs;
+    node_weight = weight;
+    parent_id = parent;
   }
-  virtual void evaluate_statement(map<string, int> &sym_tab) {
-    
-    int temp = r_side->evaluate_expression(sym_tab);
-
-    //cout << "Assigning" << ident << " to " << temp << endl;
-
-    sym_tab[ident]=temp;
-  }
-
+virtual void evaluate_statement(Map* sym_tab) {
+    TreeNode* parent_node = find_map(sym_tab, parent_id);
+    if (parent_node != NULL) {
+        TreeNode* new_node = create_node(ident, node_weight, parent_id);
+        add_child(parent_node, new_node);  // Add the new node to the parent's children vector
+    } else {
+        std::cerr << "Error: Parent node " << parent_id << " not found." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+}
 
   private: 
-    string ident;
-    integer_expression *r_side;
-  };
+    char* ident;
+    char *node_weight;
+    char* parent_id;
+};
 
-class print_statement: public statement {
- public:
-  print_statement(integer_expression *expr) {
-    e=expr;
-  }
-  virtual void evaluate_statement(map<string, int> &sym_tab) {
-    cout << e->evaluate_expression(sym_tab) << endl;
-  }
+// class while_statement: public statement {
+//  public:
+//   while_statement(boolean_expression *cond, compound_statement *body) {
+//     c=cond;
+//     b=body;
+//   }
+
+//   virtual void evaluate_statement(map<string, int> &sym_tab) {
+//     while (c->evaluate_expression(sym_tab)) {
+//       b->evaluate_statement(sym_tab);
+//     }
+//   }
     
 
-  private:
-    integer_expression *e;
+    
+//   private:
+//     boolean_expression *c;
+//     compound_statement *b;
+//   };
 
-};

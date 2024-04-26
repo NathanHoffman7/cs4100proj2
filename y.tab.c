@@ -82,10 +82,10 @@
     int yylex();
     void yyerror(char *string);
 
-    Map* my_sym_tab = create_map();
+    Map* my_sym_tab = new Map();
 
 
-#line 89 "tree_builder.tab.c"
+#line 89 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -108,7 +108,10 @@
 #  endif
 # endif
 
-
+/* Use api.header.include to #include this header
+   instead of duplicating it here.  */
+#ifndef YY_YY_Y_TAB_H_INCLUDED
+# define YY_YY_Y_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -138,6 +141,20 @@ extern int yydebug;
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
+/* Token kinds.  */
+#define YYEMPTY -2
+#define YYEOF 0
+#define YYerror 256
+#define YYUNDEF 257
+#define TK_BLDNODE 258
+#define TK_FOR 259
+#define TK_IN 260
+#define TK_NAME 261
+#define TK_WEIGHT 262
+#define TK_IsAChildOf 263
+#define TK_STRING 264
+#define TK_INT 265
+#define TK_IDENTIFIER 266
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -153,7 +170,7 @@ union YYSTYPE
     compound_statement *c_ptr;
     
 
-#line 157 "tree_builder.tab.c"
+#line 174 "y.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -168,7 +185,7 @@ extern YYSTYPE yylval;
 int yyparse (void);
 
 
-
+#endif /* !YY_YY_Y_TAB_H_INCLUDED  */
 /* Symbol kind.  */
 enum yysymbol_kind_t
 {
@@ -589,8 +606,8 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    40,    40,    49,    50,    53,    54,    58,    73,    83,
-      85,    89,    95,    96,    99,   100,   101,   104,   105,   106
+       0,    40,    40,    46,    47,    50,    51,    55,    70,    87,
+      89,    93,    94,    95,    98,    99,   100,   103,   104,   105
 };
 #endif
 
@@ -1180,144 +1197,143 @@ yyreduce:
   case 2: /* start_var: prog  */
 #line 40 "tree_builder.y"
                  { (yyval.c_ptr) = (yyvsp[0].c_ptr); 
-                
-                cout << "Trying to print map\n";
-                TreeNode* root = find_map(my_sym_tab, "root");
-                print_map(root);
-                cout << endl;
-}
-#line 1190 "tree_builder.tab.c"
+                (yyvsp[0].c_ptr)->evaluate_statement(my_sym_tab);
+                Node* root = my_sym_tab->head;
+                print_map(my_sym_tab, root);}
+#line 1204 "y.tab.c"
     break;
 
   case 3: /* prog: statement prog  */
-#line 49 "tree_builder.y"
+#line 46 "tree_builder.y"
                       { (yyval.c_ptr) = new compound_statement((yyvsp[-1].s_ptr), (yyvsp[0].c_ptr)); }
-#line 1196 "tree_builder.tab.c"
+#line 1210 "y.tab.c"
     break;
 
   case 4: /* prog: %empty  */
-#line 50 "tree_builder.y"
+#line 47 "tree_builder.y"
       {(yyval.c_ptr) = NULL;}
-#line 1202 "tree_builder.tab.c"
+#line 1216 "y.tab.c"
     break;
 
   case 5: /* statement: for_statement  */
-#line 53 "tree_builder.y"
+#line 50 "tree_builder.y"
                           { (yyval.s_ptr) = (yyvsp[0].s_ptr); cout << "For Statement\n"; }
-#line 1208 "tree_builder.tab.c"
+#line 1222 "y.tab.c"
     break;
 
   case 6: /* statement: buildnode_statement  */
-#line 54 "tree_builder.y"
+#line 51 "tree_builder.y"
                                 { (yyval.s_ptr) = (yyvsp[0].s_ptr); cout << "Building Node Statement\n";
           }
-#line 1215 "tree_builder.tab.c"
+#line 1229 "y.tab.c"
     break;
 
   case 7: /* buildnode_statement: TK_BLDNODE '{' TK_NAME '=' str_expr ';' TK_WEIGHT '=' int_expr ';' TK_IsAChildOf '=' str_expr ';' '}' ';'  */
-#line 59 "tree_builder.y"
+#line 56 "tree_builder.y"
 { 
     cout << "Name: " << (yyvsp[-11].s_val) << "\nWeight: " << (yyvsp[-7].s_val) << "\nIsAChildOf: " << (yyvsp[-3].s_val) << endl;
     TreeNode* new_node = create_node((yyvsp[-11].s_val), (yyvsp[-7].s_val), (yyvsp[-3].s_val));
-    TreeNode* parent = find_map(my_sym_tab, (yyvsp[-3].s_val));
-    if (parent == NULL)
-    {
-        cout << "Parent not found\n";
-        exit(-1);
+    if (new_node == NULL) {
+        cout << "Error: Failed to create new node." << endl;
+        exit(1);
     }
-    parent->children.push_back(new_node);
-
+    if (my_sym_tab == NULL) {
+        cout << "Error: Symbol table is not initialized." << endl;
+        exit(1);
+    }
     insert_map(my_sym_tab, (yyvsp[-11].s_val), new_node);
     (yyval.s_ptr) = new buildnode_statement((yyvsp[-11].s_val), (yyvsp[-7].s_val), (yyvsp[-3].s_val));
 }
-#line 1234 "tree_builder.tab.c"
+#line 1248 "y.tab.c"
     break;
 
   case 8: /* buildnode_statement: TK_BLDNODE '{' TK_NAME '=' str_expr ';' TK_WEIGHT '=' int_expr ';' '}' ';'  */
-#line 74 "tree_builder.y"
+#line 71 "tree_builder.y"
 { 
     cout << "Name: " << (yyvsp[-7].s_val) << "\nWeight: " << (yyvsp[-3].s_val) << endl;
     TreeNode* new_node = create_node((yyvsp[-7].s_val), (yyvsp[-3].s_val), NULL);
-
+    if (new_node == NULL) {
+        cout << "Error: Failed to create new node." << endl;
+        exit(1);
+    }
+    if (my_sym_tab == NULL) {
+        cout << "Error: Symbol table is not initialized." << endl;
+        exit(1);
+    }
     insert_map(my_sym_tab, (yyvsp[-7].s_val), new_node);
     (yyval.s_ptr) = new buildnode_statement((yyvsp[-7].s_val), (yyvsp[-3].s_val), NULL);
 }
-#line 1246 "tree_builder.tab.c"
+#line 1267 "y.tab.c"
     break;
 
   case 9: /* for_statement: TK_FOR TK_IDENTIFIER TK_IN '[' int_expr ':' int_expr ']' '{' prog '}'  */
-#line 84 "tree_builder.y"
+#line 88 "tree_builder.y"
 {cout << "\nFor Statement:\n" << "Identifier: " << (yyvsp[-9].s_val) << "\nList: " << (yyvsp[-6].s_val) << endl;}
-#line 1252 "tree_builder.tab.c"
+#line 1273 "y.tab.c"
     break;
 
   case 10: /* for_statement: TK_FOR TK_IDENTIFIER TK_IN '[' str_list ']' '{' prog '}'  */
-#line 86 "tree_builder.y"
+#line 90 "tree_builder.y"
 {cout << "\nFor Statement:\n" << "Identifier: " << (yyvsp[-7].s_val) << "\nList: " << (yyvsp[-4].s_val) << endl;}
-#line 1258 "tree_builder.tab.c"
+#line 1279 "y.tab.c"
     break;
 
   case 11: /* str_expr: TK_STRING  */
-#line 89 "tree_builder.y"
-                    { 
-    string str = std::string((yyvsp[0].s_val));
-    if (str[0] == '\"' && str[str.length()-1] == '\"')
-        str = str.substr(1, str.length()-2);
-    (yyval.s_val) = strdup(str.c_str());
-}
-#line 1269 "tree_builder.tab.c"
+#line 93 "tree_builder.y"
+                    { (yyval.s_val) = (yyvsp[0].s_val);}
+#line 1285 "y.tab.c"
     break;
 
   case 12: /* str_expr: TK_IDENTIFIER  */
-#line 95 "tree_builder.y"
+#line 94 "tree_builder.y"
                     { (yyval.s_val) = (yyvsp[0].s_val);}
-#line 1275 "tree_builder.tab.c"
+#line 1291 "y.tab.c"
     break;
 
   case 13: /* str_expr: str_expr '+' str_expr  */
-#line 96 "tree_builder.y"
+#line 95 "tree_builder.y"
                            { }
-#line 1281 "tree_builder.tab.c"
+#line 1297 "y.tab.c"
     break;
 
   case 14: /* str_list: str_expr  */
-#line 99 "tree_builder.y"
+#line 98 "tree_builder.y"
                    { (yyval.s_val) = (yyvsp[0].s_val);}
-#line 1287 "tree_builder.tab.c"
+#line 1303 "y.tab.c"
     break;
 
   case 15: /* str_list: str_list ',' str_expr  */
-#line 100 "tree_builder.y"
+#line 99 "tree_builder.y"
                            {}
-#line 1293 "tree_builder.tab.c"
+#line 1309 "y.tab.c"
     break;
 
   case 16: /* str_list: TK_INT ':' TK_INT  */
-#line 101 "tree_builder.y"
+#line 100 "tree_builder.y"
                        {}
-#line 1299 "tree_builder.tab.c"
+#line 1315 "y.tab.c"
     break;
 
   case 17: /* int_expr: TK_INT  */
-#line 104 "tree_builder.y"
+#line 103 "tree_builder.y"
                  {(yyval.s_val) = (yyvsp[0].s_val);}
-#line 1305 "tree_builder.tab.c"
+#line 1321 "y.tab.c"
     break;
 
   case 18: /* int_expr: int_expr '+' int_expr  */
-#line 105 "tree_builder.y"
+#line 104 "tree_builder.y"
                            {}
-#line 1311 "tree_builder.tab.c"
+#line 1327 "y.tab.c"
     break;
 
   case 19: /* int_expr: TK_IDENTIFIER '+' int_expr  */
-#line 106 "tree_builder.y"
+#line 105 "tree_builder.y"
                                 {}
-#line 1317 "tree_builder.tab.c"
+#line 1333 "y.tab.c"
     break;
 
 
-#line 1321 "tree_builder.tab.c"
+#line 1337 "y.tab.c"
 
       default: break;
     }
@@ -1510,7 +1526,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 109 "tree_builder.y"
+#line 108 "tree_builder.y"
 
 #include "lex.yy.c"
 

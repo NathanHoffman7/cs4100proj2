@@ -1,0 +1,34 @@
+buildnode {
+  name = "root";
+  weight = 5;
+};
+buildnode {
+  name = "A";
+  weight = 2;
+  isachildof="root";
+};
+buildnode {
+  name = "B";
+  weight = 2;
+  isachildof="root";
+};
+buildnode { 
+  name = "C";
+  weight = 3;
+  isachildof="B";
+};
+buildnode { 
+  name = "D";
+  weight = 4;
+  isachildof="C";
+};
+buildnode { 
+  name = "E";
+  weight = 4;
+  isachildof="C";
+};
+buildnode { 
+  name = "F";
+  weight = 4;
+  isachildof="C";
+};

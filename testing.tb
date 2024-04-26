@@ -1,0 +1,6 @@
+buildnode{
+    name="test",
+    type="test",
+    srcs={"test.cpp"},
+    deps={"lib"},
+}
