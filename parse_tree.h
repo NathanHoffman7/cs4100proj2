@@ -103,15 +103,16 @@ class buildnode_statement: public statement {
     node_weight = weight;
     parent_id = parent;
   }
-  virtual void evaluate_statement(Map* sym_tab) {
+virtual void evaluate_statement(Map* sym_tab) {
     TreeNode* parent_node = find_map(sym_tab, parent_id);
     if (parent_node != NULL) {
-      TreeNode* new_node = create_node(ident, node_weight, parent_id);
+        TreeNode* new_node = create_node(ident, node_weight, parent_id);
+        add_child(parent_node, new_node);  // Add the new node to the parent's children vector
     } else {
         std::cerr << "Error: Parent node " << parent_id << " not found." << std::endl;
         exit(EXIT_FAILURE);
     }
-  }
+}
 
   private: 
     char* ident;

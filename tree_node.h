@@ -16,11 +16,13 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <vector>
 
 typedef struct TreeNode {
     char* name;
     char* weight;
     char* parent;
+    std::vector<TreeNode*> children;
 } TreeNode;
 
 typedef struct Node {
@@ -38,8 +40,13 @@ TreeNode* create_node(char* name, char* weight, char* parent) {
     node->name = strdup(name);
     node->weight = strdup(weight);
     node->parent = parent ? strdup(parent) : NULL;
+    node->children = std::vector<TreeNode*>();  // Initialize the children vector
 
     return node;
+}
+
+void add_child(TreeNode* parent, TreeNode* child) {
+    parent->children.push_back(child);
 }
 
 Map* create_map() {
@@ -72,13 +79,17 @@ TreeNode* find_map(Map* map, char* key) {
     return NULL;
 }
 
-void print_map(Map* map, Node* node) {
-    while (node != NULL) {
-        std::cout << "(<" << node->tree_node->name << "," << node->tree_node->weight << ">";
-        node = node->next;
-        if (node != NULL) {
-            std::cout << ",";
-        }
+void print_map(TreeNode* node) {
+    if (node == NULL) {
+        return;
+    }
+
+    std::cout << "(<" << node->name << "," << node->weight << ">";
+    
+    // Then print all children from right to left
+    for (int i = node->children.size() - 1; i >= 0; i--) {
+        std::cout << ',';  // Separate children with a comma
+        print_map(node->children[i]);
     }
     std::cout << ")";
 }

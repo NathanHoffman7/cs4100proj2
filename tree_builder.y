@@ -16,7 +16,7 @@
     int yylex();
     void yyerror(char *string);
 
-    Map* my_sym_tab = new Map();
+    Map* my_sym_tab = create_map();
 
 %}
 
@@ -40,8 +40,10 @@
 start_var : prog { $$ = $1; 
                 
                 cout << "Trying to print map\n";
-                Node* root = my_sym_tab->head;
-                print_map(my_sym_tab, root);}
+                TreeNode* root = find_map(my_sym_tab, "root");
+                print_map(root);
+                cout << endl;
+}
     ;
 
 prog : statement prog { $$ = new compound_statement($1, $2); }
@@ -57,14 +59,14 @@ buildnode_statement : TK_BLDNODE '{' TK_NAME '=' str_expr ';' TK_WEIGHT '=' int_
 { 
     cout << "Name: " << $5 << "\nWeight: " << $9 << "\nIsAChildOf: " << $13 << endl;
     TreeNode* new_node = create_node($5, $9, $13);
-    if (new_node == NULL) {
-        cout << "Error: Failed to create new node." << endl;
-        exit(1);
+    TreeNode* parent = find_map(my_sym_tab, $13);
+    if (parent == NULL)
+    {
+        cout << "Parent not found\n";
+        exit(-1);
     }
-    if (my_sym_tab == NULL) {
-        cout << "Error: Symbol table is not initialized." << endl;
-        exit(1);
-    }
+    parent->children.push_back(new_node);
+
     insert_map(my_sym_tab, $5, new_node);
     $$ = new buildnode_statement($5, $9, $13);
 }
@@ -72,14 +74,7 @@ buildnode_statement : TK_BLDNODE '{' TK_NAME '=' str_expr ';' TK_WEIGHT '=' int_
 { 
     cout << "Name: " << $5 << "\nWeight: " << $9 << endl;
     TreeNode* new_node = create_node($5, $9, NULL);
-    if (new_node == NULL) {
-        cout << "Error: Failed to create new node." << endl;
-        exit(1);
-    }
-    if (my_sym_tab == NULL) {
-        cout << "Error: Symbol table is not initialized." << endl;
-        exit(1);
-    }
+
     insert_map(my_sym_tab, $5, new_node);
     $$ = new buildnode_statement($5, $9, NULL);
 }
