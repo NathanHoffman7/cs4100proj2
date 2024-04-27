@@ -41,9 +41,9 @@ name         { return TK_NAME; }
 weight       { return TK_WEIGHT; }
 isachildof   { return TK_IsAChildOf; }
 \"[^"]*\"     {yylval.s_val = strdup(yytext); return TK_STRING;}
-{NUM}        { yylval.s_val = strdup(yytext); return TK_INT; }
-{IDENTIFIER} {yylval.s_val = strdup(yytext); return TK_IDENTIFIER;}
 [\{|\}|\(|\)|\,|\;|=|:|\[|\]|+] {return yytext[0];}
+{NUM}        { yylval.num = atoi(yytext); return TK_INT; }
+{IDENTIFIER} {yylval.s_val = strdup(yytext); return TK_IDENTIFIER;}
 {WHITE}     { ACC(yytext[0]); 
                 /* Remove tabs/whitespace/newlines */}
 

@@ -362,11 +362,11 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[51] =
     {   0,
-        0,    0,   13,   12,   11,   12,   10,    8,    9,    9,
-        9,    9,    9,    9,    0,    7,    8,    9,    9,    9,
-        9,    9,    9,    3,    9,    9,    9,    9,    2,    9,
-        9,    9,    9,    9,    4,    9,    9,    9,    9,    9,
-        9,    5,    9,    9,    9,    9,    1,    9,    6,    0
+        0,    0,   13,   12,   11,   12,    8,    9,   10,   10,
+       10,   10,   10,   10,    0,    7,    9,   10,   10,   10,
+       10,   10,   10,    3,   10,   10,   10,   10,    2,   10,
+       10,   10,   10,   10,    4,   10,   10,   10,   10,   10,
+       10,    5,   10,   10,   10,   10,    1,   10,    6,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -834,17 +834,17 @@ YY_RULE_SETUP
 case 8:
 YY_RULE_SETUP
 #line 44 "tree_builder.l"
-{ yylval.s_val = strdup(yytext); return TK_INT; }
+{return yytext[0];}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 45 "tree_builder.l"
-{yylval.s_val = strdup(yytext); return TK_IDENTIFIER;}
+{ yylval.num = atoi(yytext); return TK_INT; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 46 "tree_builder.l"
-{return yytext[0];}
+{yylval.s_val = strdup(yytext); return TK_IDENTIFIER;}
 	YY_BREAK
 case 11:
 /* rule 11 can match eol */

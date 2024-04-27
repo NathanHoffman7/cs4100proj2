@@ -20,7 +20,7 @@
 
 typedef struct TreeNode {
     char* name;
-    char* weight;
+    int weight;
     char* parent;
     std::vector<TreeNode*> children;
 } TreeNode;
@@ -35,10 +35,10 @@ typedef struct Map {
     Node* head;
 } Map;
 
-TreeNode* create_node(char* name, char* weight, char* parent) {
+TreeNode* create_node(char* name, int weight, char* parent) {
     TreeNode* node = (TreeNode*) malloc(sizeof(TreeNode));
     node->name = strdup(name);
-    node->weight = strdup(weight);
+    node->weight = weight;
     node->parent = parent ? strdup(parent) : NULL;
     node->children = std::vector<TreeNode*>();  // Initialize the children vector
 
