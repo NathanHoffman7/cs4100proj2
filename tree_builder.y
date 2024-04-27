@@ -20,7 +20,6 @@
     Map* my_node_map = create_map();
     vector<string> my_str_list;
     vector<int> my_int_list;
-    int idx = 0;
 
 %}
 
@@ -35,8 +34,9 @@
 }
 
 %type <s_val> TK_STRING TK_IDENTIFIER 
-%type <s_val> str_expr str_list 
-%type <num>   int_expr TK_INT
+%type <str_ptr> str_expr str_list 
+%type <num>   TK_INT
+%type <int_ptr> int_expr
 %type <s_ptr> statement for_statement buildnode_statement
 %type <c_ptr> prog start_var
 
@@ -63,105 +63,32 @@ statement : for_statement { $$ = $1; cout << "For Statement\n"; }
 buildnode_statement : TK_BLDNODE '{' TK_NAME '=' str_expr ';' TK_WEIGHT '=' int_expr ';' TK_IsAChildOf '=' str_expr ';' '}' ';'
 { 
     cout << "Name: " << $5 << "\nWeight: " << $9 << "\nIsAChildOf: " << $13 << endl;
-    TreeNode* new_node = create_node($5, $9, $13);
-    TreeNode* parent = find_map(my_node_map, $13);
-    if (parent == NULL)
-    {
-        cout << "Parent not found\n";
-        exit(-1);
-    }
-    parent->children.push_back(new_node);
-
-    insert_map(my_node_map, $5, new_node);
     $$ = new buildnode_statement($5, $9, $13);
 }
 | TK_BLDNODE '{' TK_NAME '=' str_expr ';' TK_WEIGHT '=' int_expr ';' '}' ';'
 { 
     cout << "Name: " << $5 << "\nWeight: " << $9 << endl;
-    TreeNode* new_node = create_node($5, $9, NULL);
-
-    insert_map(my_node_map, $5, new_node);
     $$ = new buildnode_statement($5, $9, NULL);
 }
 ;
 
 for_statement : TK_FOR TK_IDENTIFIER TK_IN '[' TK_INT ':' TK_INT ']' '{' prog '}'
 {
-    idx = 0;
-    my_int_list.clear();
-    for (int i = $5; i <= $7; i++) {
-        my_int_list.push_back(i);
-    }
-    if (!my_int_list.empty()) {
-        cout << "\nFor Statement:\n" << "Identifier: " << $2 << "\nValues: ";
-    for (int i = 0; i < my_int_list.size(); i++) {
-        cout << my_int_list[i] << " ";
-    }
-        cout << "\nList: " << $5 << endl;
-    } else {
-        // yyerror("Undefined identifier");
-    }
     $$ = new for_statement($2, $5, $7, $10);
 }
 
-int_expr: TK_INT { $$ = $1; }
-    | TK_IDENTIFIER 
-{ 
-    if (my_int_list.size() > 0) {
-        $$ = my_int_list[idx]; // Use the current idx in the vector
-    } else {
-        // yyerror("Undefined identifier");
-        $$ = 0; // Use a default value
-    }
-}
-    | TK_INT '+' int_expr { $$ = $1 + $3; }
-    | TK_IDENTIFIER '+' int_expr 
-{ 
-    if (my_int_list.size() > 0) {
-        $$ = my_int_list[idx] + $3; // Use the current idx in the vector
-    } else {
-        // yyerror("Undefined identifier");
-        $$ = $3; // Use the other operand as the result
-    }
-}
-    | int_expr '+' TK_IDENTIFIER
-{
-    if (my_int_list.size() > 0) {
-        $$ = $1 + my_int_list[idx]; // Use the current idx in the vector
-    } else {
-        // yyerror("Undefined identifier");
-        $$ = $1; // Use the other operand as the result
-    }
-}
+int_expr: TK_INT { $$ = new int_const($1); }
+    | TK_IDENTIFIER { $$ = new int_var(atoi($1)); }
+    | int_expr '+' int_expr { $$ = new int_add_expr($1, $3); }
 ;
 
-str_expr: TK_STRING { 
-    string str = std::string($1);
-    if (str[0] == '\"' && str[str.length()-1] == '\"')
-        str = str.substr(1, str.length()-2);
-    $$ = strdup(str.c_str());
-}
-    | TK_IDENTIFIER 
-{ 
-    if (my_str_list.size() > 0){
-        $$ = strdup(my_str_list[idx].c_str()); // Use the current idx in the vector
-    } else {
-        // yyerror("Undefined identifier");
-        $$ = strdup(""); // Use a default value
-    }
-}
-    | str_expr '+' TK_IDENTIFIER
-{ 
-    string left = $1;
-    string right = $3;
-    if (my_str_list.size() > 0) {
-        right = my_str_list[idx]; // Use the current idx in the vector
-    }
-    $$ = strdup((left + right).c_str()); 
-};
+str_expr: TK_STRING { $$ = new str_const($1); }
+    | TK_IDENTIFIER { $$ = new str_var($1); }
+    | str_expr '+' str_expr { $$ = new str_add_expr($1, $3); }
+;
 
 str_list: str_expr { $$ = $1;}
-    | str_list ',' str_expr{}
+    | str_list ',' str_expr { $$ = new str_list($1, $3);}
     ;
 
 
