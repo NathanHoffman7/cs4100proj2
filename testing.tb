@@ -1,6 +1,12 @@
 buildnode{
-    name="test",
-    type="test",
-    srcs={"test.cpp"},
-    deps={"lib"},
+name="root";
+weight=10;
+};
+for i in [red,green,blue] {
+  buildnode {
+    name = i;
+    weight = 7;
+    isachildof = "root";
+  };
 }
+
